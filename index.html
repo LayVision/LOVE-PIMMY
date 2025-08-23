@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รักน้องพิมพ์ ที่สุดในโลก</title>
     <style>
-        /* ใช้ฟอนต์ Kanit เพื่อความสวยงามของภาษาไทย */
+        /* CSS เหมือนเดิม ไม่มีการเปลี่ยนแปลง */
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap');
 
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: #fde4ea; /* สีชมพูอ่อนสำหรับพื้นหลัง */
+            background-color: #fde4ea;
             color: #333;
             display: flex;
             justify-content: center;
@@ -28,11 +28,11 @@
             text-align: center;
             width: 90%;
             max-width: 450px;
-            border: 2px solid #f48fb1; /* ขอบสีชมพู */
+            border: 2px solid #f48fb1;
         }
 
         h1 {
-            color: #e91e63; /* สีชมพูเข้ม */
+            color: #e91e63;
             margin-bottom: 25px;
             font-size: 2em;
         }
@@ -50,8 +50,8 @@
             color: #555;
         }
 
-        input[type="time"] {
-            border: 2px solid #f8bbd0; /* สีชมพูอ่อนสำหรับเส้นขอบ */
+        input[type="text"] {
+            border: 2px solid #f8bbd0;
             border-radius: 10px;
             padding: 10px;
             font-size: 1.1em;
@@ -61,13 +61,13 @@
             transition: border-color 0.3s ease;
         }
 
-        input[type="time"]:focus {
+        input[type="text"]:focus {
             outline: none;
-            border-color: #e91e63; /* เปลี่ยนสีขอบเมื่อ focus */
+            border-color: #e91e63;
         }
 
         button {
-            background-color: #e91e63; /* สีชมพูเข้ม */
+            background-color: #e91e63;
             color: white;
             border: none;
             padding: 12px 30px;
@@ -79,7 +79,7 @@
         }
 
         button:hover {
-            background-color: #c2185b; /* สีชมพูเข้มขึ้นเมื่อเอาเมาส์ไปวาง */
+            background-color: #c2185b;
             transform: scale(1.05);
         }
         
@@ -92,7 +92,7 @@
             font-size: 1.3em;
             color: #333;
             font-weight: bold;
-            min-height: 30px; /* จองพื้นที่สำหรับผลลัพธ์ */
+            min-height: 30px;
         }
     </style>
 </head>
@@ -103,12 +103,13 @@
         
         <div class="time-input-container">
             <div>
-                <label for="startTime">เวลาเริ่มต้น (24 ชม.)</label><br>
-                <input type="time" id="startTime" required>
+                <label for="startTime">เวลาเริ่มต้น</label><br>
+                <!-- เพิ่ม oninput event เพื่อเรียกฟังก์ชัน formatTimeInput -->
+                <input type="text" id="startTime" placeholder="เช่น 14:20" maxlength="5" oninput="formatTimeInput(this)" required>
             </div>
             <div>
-                <label for="endTime">เวลาสิ้นสุด (24 ชม.)</label><br>
-                <input type="time" id="endTime" required>
+                <label for="endTime">เวลาสิ้นสุด</label><br>
+                <input type="text" id="endTime" placeholder="เช่น 18:50" maxlength="5" oninput="formatTimeInput(this)" required>
             </div>
         </div>
         
@@ -118,19 +119,41 @@
     </div>
 
     <script>
+        // ฟังก์ชันใหม่สำหรับใส่ ":" อัตโนมัติ
+        function formatTimeInput(element) {
+            let value = element.value;
+
+            // ลบทุกอย่างที่ไม่ใช่ตัวเลขออกไปก่อน
+            value = value.replace(/[^0-9]/g, '');
+
+            // ถ้ามีตัวเลขมากกว่า 2 ตัว ให้ใส่ ":" หลังตัวที่ 2
+            if (value.length > 2) {
+                value = value.substring(0, 2) + ':' + value.substring(2);
+            }
+
+            // อัปเดตค่าในช่องกรอก
+            element.value = value;
+        }
+
         function calculateTime() {
             const startTimeValue = document.getElementById('startTime').value;
             const endTimeValue = document.getElementById('endTime').value;
             const resultElement = document.getElementById('result');
 
+            const timeFormatRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+
             if (!startTimeValue || !endTimeValue) {
                 resultElement.textContent = 'กรุณาใส่เวลาให้ครบทั้งสองช่อง';
-                resultElement.style.color = '#d32f2f'; // สีแดงสำหรับข้อความผิดพลาด
+                resultElement.style.color = '#d32f2f';
+                return;
+            }
+            
+            if (!timeFormatRegex.test(startTimeValue) || !timeFormatRegex.test(endTimeValue)) {
+                resultElement.textContent = 'รูปแบบเวลาไม่ถูกต้อง (ต้องเป็น HH:MM)';
+                resultElement.style.color = '#d32f2f';
                 return;
             }
 
-            // ค่าที่ได้จาก input type="time" จะเป็นรูปแบบ 24 ชั่วโมงเสมอ (เช่น "14:30")
-            // ทำให้การคำนวณด้านล่างนี้ทำงานกับระบบ 24 ชั่วโมงได้ถูกต้อง
             const [startHours, startMinutes] = startTimeValue.split(':').map(Number);
             const [endHours, endMinutes] = endTimeValue.split(':').map(Number);
 
